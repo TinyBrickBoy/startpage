@@ -1384,7 +1384,7 @@ function parseFeedXML(xmlText) {
 }
 
 async function fetchFeed(url) {
-  const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+  const res = await fetch('https://corsproxy.io/' + encodeURIComponent(url));
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return parseFeedXML(await res.text());
 }
