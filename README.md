@@ -2,7 +2,7 @@
 
 Minimalistische, anpassbare Browser-Startseite. Eine einzige HTML-Datei — kein Build, keine Abhängigkeiten, alle Einstellungen im `localStorage`.
 
-**🌐 Demo: <https://tinybrickboy.github.io/startpage>** *(URL hier eintragen)*
+**🌐 Demo: <https://tinybrickboy.github.io/startpage>**
 
 ## Features
 
