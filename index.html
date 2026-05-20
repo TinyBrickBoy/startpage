@@ -595,6 +595,43 @@
     flex: 1;
   }
 
+  .settings-tabs {
+    position: sticky;
+    top: 57px;
+    z-index: 1;
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.6rem 1.5rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .settings-tabs::-webkit-scrollbar { display: none; }
+  .settings-tab {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg-card);
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  .settings-tab:hover { color: var(--ink); }
+  .settings-tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+  }
+
+  .settings-tab-content { display: none; }
+  .settings-tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+
   .settings-section {
     margin-bottom: 2rem;
   }
@@ -922,8 +959,16 @@
       <button class="settings-close" id="close-settings">×</button>
     </div>
 
+    <nav class="settings-tabs" id="settings-tabs">
+      <button class="settings-tab active" data-tab="appearance">Look</button>
+      <button class="settings-tab" data-tab="modules">Module</button>
+      <button class="settings-tab" data-tab="content">Inhalte</button>
+      <button class="settings-tab" data-tab="search">Suche</button>
+    </nav>
+
     <div class="settings-body">
 
+    <div class="settings-tab-content active" data-tab-content="appearance">
       <!-- Theme -->
       <div class="settings-section">
         <h3>Theme</h3>
@@ -970,7 +1015,9 @@
           <div class="hint" style="margin-top: 0.4rem; font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint);">Tipp: unsplash.com/photos für freie Bilder</div>
         </div>
       </div>
+    </div><!-- /appearance -->
 
+    <div class="settings-tab-content" data-tab-content="modules">
       <!-- Modules -->
       <div class="settings-section">
         <h3>Module</h3>
@@ -1020,7 +1067,9 @@
         </div>
         <div class="hint" style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); margin-top: 0.4rem;" id="weather-current-info">—</div>
       </div>
+    </div><!-- /modules -->
 
+    <div class="settings-tab-content" data-tab-content="content">
       <!-- Feeds -->
       <div class="settings-section">
         <h3>News-Feeds</h3>
@@ -1042,7 +1091,9 @@
         <div class="bookmark-list" id="bookmark-edit-list"></div>
         <button class="btn btn-sm" id="add-bookmark">+ Bookmark hinzufügen</button>
       </div>
+    </div><!-- /content -->
 
+    <div class="settings-tab-content" data-tab-content="search">
       <!-- Search engine + shortcuts -->
       <div class="settings-section">
         <h3>Suche & Shortcuts</h3>
@@ -1063,6 +1114,7 @@
         <div id="shortcut-list"></div>
         <button class="btn btn-sm" id="add-shortcut">+ Regel hinzufügen</button>
       </div>
+    </div><!-- /search -->
 
     </div>
 
@@ -1608,6 +1660,16 @@ document.getElementById('open-settings').addEventListener('click', () => {
   panel.classList.add('open');
   overlay.classList.add('open');
   renderSettings();
+});
+
+// Tabs
+document.querySelectorAll('.settings-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    const name = t.dataset.tab;
+    document.querySelectorAll('.settings-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.toggle('active', c.dataset.tabContent === name));
+    panel.scrollTop = 0;
+  });
 });
 document.getElementById('close-settings').addEventListener('click', closeSettings);
 overlay.addEventListener('click', closeSettings);
