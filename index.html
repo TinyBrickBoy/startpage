@@ -1179,8 +1179,7 @@
           <div style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-soft); line-height: 1.6;">
             <code>1.2.3.4</code> → IP &nbsp;·&nbsp; <code>example.com</code> → Domain &nbsp;·&nbsp; <code>https://…</code> → direkt öffnen<br>
             <code>name@host.de</code> → E-Mail &nbsp;·&nbsp; <code>CVE-2024-1234</code> → NVD<br>
-            <code>md5/sha1/sha256</code> → VirusTotal &nbsp;·&nbsp; <code>owner/repo</code> → GitHub<br>
-            <code>52.5,13.4</code> → OpenStreetMap &nbsp;·&nbsp; <code>#ff5733</code> → Color
+            <code>md5/sha1/sha256</code> → VirusTotal &nbsp;·&nbsp; <code>52.5,13.4</code> → OpenStreetMap
           </div>
           <div style="font-size: 0.78rem; font-weight: 600; margin: 0.65rem 0 0.35rem;">!bangs</div>
           <div style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-soft); line-height: 1.6;">
@@ -1628,9 +1627,7 @@ const urlRegex = /^https?:\/\/\S+$/i;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const hashRegex = /^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$/;
 const cveRegex = /^CVE-\d{4}-\d{4,7}$/i;
-const repoRegex = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
 const coordsRegex = /^-?\d{1,2}(?:\.\d+)?\s*,\s*-?\d{1,3}(?:\.\d+)?$/;
-const colorRegex = /^#?[0-9a-fA-F]{6}$|^#?[0-9a-fA-F]{3}$/;
 
 // DuckDuckGo-style !bangs: "!yt cats" -> youtube search
 const BANGS = {
@@ -1686,8 +1683,6 @@ function detectType(value) {
   if (hashRegex.test(v)) return 'hash';
   if (coordsRegex.test(v)) return 'coords';
   if (ipv4Regex.test(v) || ipv6Regex.test(v)) return 'ip';
-  if (repoRegex.test(v) && !v.includes(' ')) return 'repo';
-  if (colorRegex.test(v)) return 'color';
   if (domainRegex.test(v)) return 'domain';
   return 'search';
 }
@@ -1697,18 +1692,16 @@ const TYPE_FALLBACKS = {
   email:  v => 'mailto:' + v,
   hash:   v => 'https://www.virustotal.com/gui/search/' + encodeURIComponent(v),
   cve:    v => 'https://nvd.nist.gov/vuln/detail/' + v.toUpperCase(),
-  repo:   v => 'https://github.com/' + v,
   coords: v => {
     const [lat, lon] = v.split(',').map(s => s.trim());
     return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`;
   },
-  color:  v => 'https://www.color-hex.com/color/' + (v.startsWith('#') ? v.slice(1) : v),
 };
 
 const TYPE_LABELS = {
   ip: 'IP', domain: 'Domain', url: 'URL', email: 'E-Mail',
-  hash: 'Hash', cve: 'CVE', repo: 'GitHub Repo', coords: 'Koordinaten',
-  color: 'Hex-Farbe', math: 'Math', bang: 'Bang', search: 'Suche',
+  hash: 'Hash', cve: 'CVE', coords: 'Koordinaten',
+  math: 'Math', bang: 'Bang', search: 'Suche',
 };
 
 function getSearchEngineUrl() {
@@ -2239,7 +2232,7 @@ function renderShortcutEdits() {
   state.shortcuts.forEach((s, i) => {
     const row = document.createElement('div');
     row.className = 'shortcut-rule';
-    const types = ['ip','domain','email','hash','cve','repo','coords','color'];
+    const types = ['ip','domain','email','hash','cve','coords'];
     const opts = types.map(t => `<option value="${t}" ${s.type === t ? 'selected' : ''}>${TYPE_LABELS[t]}</option>`).join('');
     row.innerHTML = `
       <select class="settings-select">${opts}</select>
