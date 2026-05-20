@@ -858,7 +858,7 @@
   /* Shortcut rules */
   .shortcut-rule {
     display: grid;
-    grid-template-columns: 90px 1fr auto;
+    grid-template-columns: 110px 1fr auto;
     gap: 0.35rem;
     align-items: center;
     margin-bottom: 0.4rem;
@@ -1173,6 +1173,26 @@
         <div class="hint" style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); margin-bottom: 0.5rem;">{input} wird durch die Eingabe ersetzt</div>
         <div id="shortcut-list"></div>
         <button class="btn btn-sm" id="add-shortcut">+ Regel hinzufügen</button>
+
+        <div style="margin-top: 1rem; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 8px; background: color-mix(in srgb, var(--accent) 4%, transparent);">
+          <div style="font-size: 0.78rem; font-weight: 600; margin-bottom: 0.35rem;">Auto-erkannt</div>
+          <div style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-soft); line-height: 1.6;">
+            <code>1.2.3.4</code> → IP &nbsp;·&nbsp; <code>example.com</code> → Domain &nbsp;·&nbsp; <code>https://…</code> → direkt öffnen<br>
+            <code>name@host.de</code> → E-Mail &nbsp;·&nbsp; <code>CVE-2024-1234</code> → NVD<br>
+            <code>md5/sha1/sha256</code> → VirusTotal &nbsp;·&nbsp; <code>owner/repo</code> → GitHub<br>
+            <code>52.5,13.4</code> → OpenStreetMap &nbsp;·&nbsp; <code>#ff5733</code> → Color
+          </div>
+          <div style="font-size: 0.78rem; font-weight: 600; margin: 0.65rem 0 0.35rem;">!bangs</div>
+          <div style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-soft); line-height: 1.6;">
+            <code>!yt cats</code> · <code>!gh react</code> · <code>!w paris</code> · <code>!mdn fetch</code> · <code>!npm vite</code><br>
+            <code>!so async</code> · <code>!gpt …</code> · <code>!aw arch</code> · <code>!gimg …</code> · <code>!maps …</code><br>
+            <code>!tr hello</code> · <code>!r linux</code> · <code>!ddg …</code> · <code>!hn …</code> · <code>!wd …</code>
+          </div>
+          <div style="font-size: 0.78rem; font-weight: 600; margin: 0.65rem 0 0.35rem;">Inline-Math</div>
+          <div style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-soft); line-height: 1.6;">
+            <code>=2+2</code> · <code>=(15*1.19)</code> · <code>=2^10</code> — Enter zeigt das Ergebnis
+          </div>
+        </div>
       </div>
     </div><!-- /search -->
 
@@ -1604,14 +1624,92 @@ const form = document.getElementById('search-form');
 const ipv4Regex = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)$/;
 const ipv6Regex = /^(?:[a-fA-F0-9]{1,4}:){2,7}[a-fA-F0-9]{1,4}$/;
 const domainRegex = /^(?!-)(?:[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,}$/;
+const urlRegex = /^https?:\/\/\S+$/i;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const hashRegex = /^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$/;
+const cveRegex = /^CVE-\d{4}-\d{4,7}$/i;
+const repoRegex = /^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/;
+const coordsRegex = /^-?\d{1,2}(?:\.\d+)?\s*,\s*-?\d{1,3}(?:\.\d+)?$/;
+const colorRegex = /^#?[0-9a-fA-F]{6}$|^#?[0-9a-fA-F]{3}$/;
+
+// DuckDuckGo-style !bangs: "!yt cats" -> youtube search
+const BANGS = {
+  yt:    { name: 'YouTube',       url: 'https://www.youtube.com/results?search_query={input}' },
+  gh:    { name: 'GitHub',        url: 'https://github.com/search?q={input}' },
+  w:     { name: 'Wikipedia',     url: 'https://en.wikipedia.org/wiki/Special:Search?search={input}' },
+  wd:    { name: 'Wikipedia DE',  url: 'https://de.wikipedia.org/wiki/Special:Search?search={input}' },
+  mdn:   { name: 'MDN',           url: 'https://developer.mozilla.org/en-US/search?q={input}' },
+  npm:   { name: 'npm',           url: 'https://www.npmjs.com/search?q={input}' },
+  so:    { name: 'StackOverflow', url: 'https://stackoverflow.com/search?q={input}' },
+  gpt:   { name: 'ChatGPT',       url: 'https://chat.openai.com/?q={input}' },
+  aw:    { name: 'Arch Wiki',     url: 'https://wiki.archlinux.org/index.php?search={input}' },
+  gimg:  { name: 'G. Images',     url: 'https://www.google.com/search?tbm=isch&q={input}' },
+  maps:  { name: 'Maps',          url: 'https://www.google.com/maps/search/{input}' },
+  tr:    { name: 'Translate',     url: 'https://translate.google.com/?text={input}' },
+  r:     { name: 'Reddit',        url: 'https://www.reddit.com/search/?q={input}' },
+  ddg:   { name: 'DuckDuckGo',    url: 'https://duckduckgo.com/?q={input}' },
+  hn:    { name: 'Hacker News',   url: 'https://hn.algolia.com/?q={input}' },
+};
+
+function parseBang(v) {
+  const m = v.match(/^!(\w+)(?:\s+(.+))?$/);
+  if (!m) return null;
+  const bang = BANGS[m[1].toLowerCase()];
+  if (!bang) return null;
+  return { bang, query: (m[2] || '').trim() };
+}
+
+function safeMath(expr) {
+  const e = expr.trim();
+  if (!e) return null;
+  // Only digits, basic ops, parens, decimal point/comma, percent, exponent
+  if (!/^[\d+\-*/().%\s,^]+$/.test(e)) return null;
+  try {
+    const sanitized = e.replace(/,/g, '.').replace(/\^/g, '**');
+    const result = Function('"use strict"; return (' + sanitized + ')')();
+    if (typeof result === 'number' && isFinite(result)) {
+      // Trim trailing zeros, max 8 decimals
+      return Number.isInteger(result) ? String(result) : parseFloat(result.toFixed(8)).toString();
+    }
+  } catch (e) {}
+  return null;
+}
 
 function detectType(value) {
   const v = value.trim();
   if (!v) return null;
+  if (v.startsWith('=')) return 'math';
+  if (v.startsWith('!')) return 'bang';
+  if (urlRegex.test(v)) return 'url';
+  if (emailRegex.test(v)) return 'email';
+  if (cveRegex.test(v)) return 'cve';
+  if (hashRegex.test(v)) return 'hash';
+  if (coordsRegex.test(v)) return 'coords';
   if (ipv4Regex.test(v) || ipv6Regex.test(v)) return 'ip';
+  if (repoRegex.test(v) && !v.includes(' ')) return 'repo';
+  if (colorRegex.test(v)) return 'color';
   if (domainRegex.test(v)) return 'domain';
   return 'search';
 }
+
+// Fallback URLs when no user rule exists for a detected type
+const TYPE_FALLBACKS = {
+  email:  v => 'mailto:' + v,
+  hash:   v => 'https://www.virustotal.com/gui/search/' + encodeURIComponent(v),
+  cve:    v => 'https://nvd.nist.gov/vuln/detail/' + v.toUpperCase(),
+  repo:   v => 'https://github.com/' + v,
+  coords: v => {
+    const [lat, lon] = v.split(',').map(s => s.trim());
+    return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`;
+  },
+  color:  v => 'https://www.color-hex.com/color/' + (v.startsWith('#') ? v.slice(1) : v),
+};
+
+const TYPE_LABELS = {
+  ip: 'IP', domain: 'Domain', url: 'URL', email: 'E-Mail',
+  hash: 'Hash', cve: 'CVE', repo: 'GitHub Repo', coords: 'Koordinaten',
+  color: 'Hex-Farbe', math: 'Math', bang: 'Bang', search: 'Suche',
+};
 
 function getSearchEngineUrl() {
   if (state.searchEngine === 'custom') return state.searchEngineCustom;
@@ -1627,22 +1725,51 @@ function getEngineName() {
   return state.searchEngine;
 }
 
+function hostOf(u) {
+  try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return null; }
+}
+
+function resolveTarget(v, type) {
+  if (type === 'url') return { url: v, label: hostOf(v) || 'open' };
+  if (type === 'math') {
+    // Strip a trailing " = result" so re-evaluation works on the result line
+    const expr = v.slice(1).replace(/=.*$/, '').trim();
+    const r = safeMath(expr);
+    return r !== null ? { math: r, expr } : { math: null };
+  }
+  if (type === 'bang') {
+    const b = parseBang(v);
+    if (!b) return { url: getSearchEngineUrl().replace('{query}', encodeURIComponent(v)), label: getEngineName() };
+    if (!b.query) return { bangPreview: b.bang.name };
+    return { url: b.bang.url.replace('{input}', encodeURIComponent(b.query)), label: b.bang.name };
+  }
+  const rule = getShortcutForType(type);
+  if (rule) {
+    const url = rule.url.replace('{input}', encodeURIComponent(v));
+    return { url, label: hostOf(rule.url) || TYPE_LABELS[type] };
+  }
+  if (TYPE_FALLBACKS[type]) {
+    const url = TYPE_FALLBACKS[type](v);
+    return { url, label: hostOf(url) || TYPE_LABELS[type] };
+  }
+  if (type === 'ip' || type === 'domain') {
+    return { url: getSearchEngineUrl().replace('{query}', encodeURIComponent(v)), label: getEngineName() };
+  }
+  return { url: getSearchEngineUrl().replace('{query}', encodeURIComponent(v)), label: getEngineName() };
+}
+
 function updateHint() {
+  const v = input.value.trim();
   const type = detectType(input.value);
   if (!type) { hint.classList.remove('visible'); return; }
   hint.classList.add('visible');
-  if (type === 'ip') {
-    const rule = getShortcutForType('ip');
-    if (rule) {
-      try { hint.textContent = '→ ' + new URL(rule.url).hostname; } catch(e) { hint.textContent = '→ ip'; }
-    } else hint.textContent = '→ ' + getEngineName();
-  } else if (type === 'domain') {
-    const rule = getShortcutForType('domain');
-    if (rule) {
-      try { hint.textContent = '→ ' + new URL(rule.url).hostname; } catch(e) { hint.textContent = '→ domain'; }
-    } else hint.textContent = '→ ' + getEngineName();
+  const t = resolveTarget(v, type);
+  if (t.math !== undefined) {
+    hint.textContent = t.math === null ? '= ?' : '= ' + t.math;
+  } else if (t.bangPreview) {
+    hint.textContent = '!' + t.bangPreview + ' …';
   } else {
-    hint.textContent = '→ ' + getEngineName();
+    hint.textContent = '→ ' + t.label;
   }
 }
 input.addEventListener('input', updateHint);
@@ -1652,18 +1779,15 @@ form.addEventListener('submit', (e) => {
   const v = input.value.trim();
   if (!v) return;
   const type = detectType(v);
-  let url;
-  if (type === 'ip' || type === 'domain') {
-    const rule = getShortcutForType(type);
-    if (rule) {
-      url = rule.url.replace('{input}', encodeURIComponent(v));
-    } else {
-      url = getSearchEngineUrl().replace('{query}', encodeURIComponent(v));
-    }
-  } else {
-    url = getSearchEngineUrl().replace('{query}', encodeURIComponent(v));
+  const t = resolveTarget(v, type);
+  if (t.math !== undefined) {
+    if (t.math === null) return;
+    input.value = '=' + t.expr + ' = ' + t.math;
+    updateHint();
+    return;
   }
-  window.location.href = url;
+  if (!t.url) return;
+  window.location.href = t.url;
 });
 
 // ============================================================
@@ -2115,11 +2239,10 @@ function renderShortcutEdits() {
   state.shortcuts.forEach((s, i) => {
     const row = document.createElement('div');
     row.className = 'shortcut-rule';
+    const types = ['ip','domain','email','hash','cve','repo','coords','color'];
+    const opts = types.map(t => `<option value="${t}" ${s.type === t ? 'selected' : ''}>${TYPE_LABELS[t]}</option>`).join('');
     row.innerHTML = `
-      <select class="settings-select">
-        <option value="ip" ${s.type === 'ip' ? 'selected' : ''}>IP</option>
-        <option value="domain" ${s.type === 'domain' ? 'selected' : ''}>Domain</option>
-      </select>
+      <select class="settings-select">${opts}</select>
       <input type="url" class="settings-input" value="${escapeHtml(s.url)}" placeholder="https://...?q={input}">
       <button class="icon-btn danger" title="Löschen">×</button>
     `;
