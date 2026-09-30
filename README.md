@@ -11,7 +11,7 @@ Minimalistische, anpassbare Browser-Startseite. Eine einzige HTML-Datei — kein
 - **Begrüßung** — tageszeit-abhängig (inkl. Schimpf-Modus von 3–5 Uhr morgens)
 - **Smart Search** — erkennt IPs und Domains automatisch und schickt sie an konfigurierbare Tools (`ipinfo.io/{input}`, `digga.dev/?domain={input}`, …)
 - **Bookmarks** — mit echten Marken-Icons via [Simple Icons](https://simpleicons.org)
-- **News-Feeds** — RSS/Atom (Default: Tagesschau + Hacker News), beliebig erweiterbar
+- **News-Feeds** — RSS/Atom (Default: Tagesschau + Hacker News), beliebig erweiterbar, optional über einen **eigenen CORS-Proxy**
 - **Notizen / Todos** — schnelle Listen, persistent
 - **Themes** — Hell / Dunkel / Auto + freie Akzentfarbe
 - **Hintergründe** — Farbe, Gradient oder eigenes Bild mit Verdunklung
@@ -43,5 +43,6 @@ Alles über das Zahnrad-Icon oben rechts. Einstellungen werden im `localStorage`
 - Wetter: [Open-Meteo](https://open-meteo.com)
 - Stadt-Lookup: [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api)
 - PLZ-Lookup: [Zippopotam.us](https://zippopotam.us)
+- Feeds (CORS-Proxy): [corsfix](https://corsfix.com) oder ein eigener Proxy (Einstellungen → Inhalte). `{url}` wird durch die kodierte Feed-URL ersetzt, `{rawurl}` durch die unkodierte; ohne Platzhalter wird die kodierte URL angehängt.
 - Brand-Icons: [Simple Icons](https://simpleicons.org)
 - Schrift: [IBM Plex](https://fonts.google.com/?query=ibm+plex)
