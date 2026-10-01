@@ -1139,7 +1139,12 @@
           </div>
           <input type="number" class="settings-input" id="feeds-limit" min="1" max="20" style="width: 70px;">
         </div>
-        <div class="hint" style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); margin: 0.5rem 0;">RSS- oder Atom-URL. Feeds werden serverseitig geholt (10 min Cache).</div>
+        <div class="settings-row" style="display: block;">
+          <label style="display: block; margin-bottom: 0.4rem;">Eigener CORS-Proxy</label>
+          <input type="url" class="settings-input" id="cors-proxy" placeholder="https://proxy.corsfix.com/?">
+          <div class="hint" style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); margin-top: 0.35rem;">Leer = Standard (corsfix). {url} wird durch die kodierte Feed-URL ersetzt, {rawurl} durch die unkodierte. Ohne Platzhalter wird die kodierte URL angehängt.</div>
+        </div>
+        <div class="hint" style="font-family: var(--mono); font-size: 0.7rem; color: var(--ink-faint); margin: 0.5rem 0;">RSS- oder Atom-URL. Feeds werden über den CORS-Proxy geholt.</div>
         <div id="feed-edit-list"></div>
         <button class="btn btn-sm" id="add-feed">+ Feed hinzufügen</button>
       </div>
@@ -1261,6 +1266,7 @@ const DEFAULTS = {
     { name: 'Hacker News', url: 'https://hnrss.org/frontpage',               enabled: true },
   ],
   feedsLimit: 5,
+  corsProxy: '',
 };
 
 const COLORS = [
@@ -1478,6 +1484,7 @@ loadWeather();
 // RSS FEEDS
 // ============================================================
 let feedsLoading = false;
+let feedsReloadPending = false;
 
 function formatRelativeTime(ts) {
   if (!ts) return '';
@@ -1535,14 +1542,23 @@ function parseFeedXML(xmlText) {
   throw new Error('Kein RSS/Atom-Feed erkannt');
 }
 
+const DEFAULT_CORS_PROXY = 'https://proxy.corsfix.com/?';
+
+function proxiedUrl(url) {
+  const proxy = (state.corsProxy || '').trim() || DEFAULT_CORS_PROXY;
+  if (proxy.includes('{url}')) return proxy.replaceAll('{url}', encodeURIComponent(url));
+  if (proxy.includes('{rawurl}')) return proxy.replaceAll('{rawurl}', url);
+  return proxy + encodeURIComponent(url);
+}
+
 async function fetchFeed(url) {
-  const res = await fetch('https://proxy.corsfix.com/?' + encodeURIComponent(url));
+  const res = await fetch(proxiedUrl(url));
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return parseFeedXML(await res.text());
 }
 
 async function loadFeeds() {
-  if (feedsLoading) return;
+  if (feedsLoading) { feedsReloadPending = true; return; }
   feedsLoading = true;
   const statusEl = document.getElementById('feeds-status');
   const listEl = document.getElementById('feed-list');
@@ -1576,6 +1592,7 @@ async function loadFeeds() {
   const failed = results.filter(r => r.error).length;
   statusEl.textContent = `${merged.length} Artikel${failed ? ` · ${failed} Fehler` : ''}`;
   feedsLoading = false;
+  if (feedsReloadPending) { feedsReloadPending = false; loadFeeds(); }
 }
 
 function renderFeedList(items) {
@@ -2068,6 +2085,12 @@ document.getElementById('feeds-limit').addEventListener('change', (e) => {
   saveState();
   loadFeeds();
 });
+document.getElementById('cors-proxy').addEventListener('change', (e) => {
+  state.corsProxy = e.target.value.trim();
+  e.target.value = state.corsProxy;
+  saveState();
+  loadFeeds();
+});
 
 // Reset & Export
 document.getElementById('reset-settings').addEventListener('click', () => {
@@ -2162,6 +2185,7 @@ function renderSettings() {
 
   // Feeds
   document.getElementById('feeds-limit').value = state.feedsLimit || 5;
+  document.getElementById('cors-proxy').value = state.corsProxy || '';
 
   renderBookmarkEdits();
   renderShortcutEdits();
