@@ -41,7 +41,7 @@ Firefox cannot open a custom URL in new tabs by itself. The add-on
 adds that option. It also keeps the address bar empty, so you can still search
 from it, and puts the cursor into the page.
 
-[![Install](https://img.shields.io/badge/Install-Firefox_Addon-FF7139?style=for-the-badge&logo=firefox)](https://addons.mozilla.org/firefox/addon/custom-new-tab-url/)
+[![Install](https://img.shields.io/badge/Install-Firefox_Addon-FF7139?style=for-the-badge&logo=firefox)](https://addons.mozilla.org/firefox/addon/url-new-tab/)
 
 ## Configuration
 
