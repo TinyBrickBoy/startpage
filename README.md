@@ -1,48 +1,57 @@
 # Startpage
 
-Minimalistische, anpassbare Browser-Startseite. Eine einzige HTML-Datei — kein Build, keine Abhängigkeiten, alle Einstellungen im `localStorage`.
+Minimal, customizable browser start page. A single HTML file: no build step, no dependencies, all settings stored in `localStorage`.
 
 **🌐 Demo: <https://tinybrickboy.github.io/startpage>**
 
 ## Features
 
-- **Uhr & Datum** — minimalistisch, mit Wochentag
-- **Wetter** — via Open-Meteo, Standort per Stadt **oder PLZ** (DE/AT/CH/NL/FR/US/GB)
-- **Begrüßung** — tageszeit-abhängig (inkl. Schimpf-Modus von 3–5 Uhr morgens)
-- **Smart Search** — erkennt IPs und Domains automatisch und schickt sie an konfigurierbare Tools (`ipinfo.io/{input}`, `digga.dev/?domain={input}`, …)
-- **Bookmarks** — mit echten Marken-Icons via [Simple Icons](https://simpleicons.org)
-- **News-Feeds** — RSS/Atom (Default: Tagesschau + Hacker News), beliebig erweiterbar, optional über einen **eigenen CORS-Proxy**
-- **Notizen / Todos** — schnelle Listen, persistent
-- **Themes** — Hell / Dunkel / Auto + freie Akzentfarbe
-- **Hintergründe** — Farbe, Gradient oder eigenes Bild mit Verdunklung
-- **Import / Export** — alle Einstellungen als JSON
-- **Module ein-/ausblenden** — jede Sektion einzeln abschaltbar
+- **Clock & date**: minimal, with weekday
+- **Weather**: via Open-Meteo, location by city **or postal code** (DE/AT/CH/NL/FR/US/GB)
+- **Greeting**: depends on the time of day (including a scolding mode from 3 to 5 a.m.)
+- **Smart search**: detects IPs and domains automatically and sends them to configurable tools (`ipinfo.io/{input}`, `digga.dev/?domain={input}`, …)
+- **Bookmarks**: with real brand icons via [Simple Icons](https://simpleicons.org)
+- **News feeds**: RSS/Atom (default: Tagesschau + Hacker News), freely extendable, optionally through your **own CORS proxy**
+- **Notes / todos**: quick lists, persistent
+- **Themes**: light / dark / auto plus a custom accent color
+- **Backgrounds**: color, gradient or your own image with dimming
+- **Import / export**: all settings as JSON
+- **Show / hide modules**: every section can be turned off individually
 
 ## Screenshots
 
-![Hell-Modus](screenshots/light.png)
+![Light mode](screenshots/light.png)
 
-![Dunkel-Modus](screenshots/dark.png)
+![Dark mode](screenshots/dark.png)
 
-![Custom-BG](screenshots/custom.png)
+![Custom background](screenshots/custom.png)
 
 
 ## Installation
 
-Als Startseite setzen:
+Set it as your home page:
 
-- **Firefox:** Einstellungen → Startseite → Benutzerdefinierte URL → URL einfügen
-- **Chrome:** Einstellungen → Beim Start → Bestimmte Seite öffnen → URL einfügen
+- **Firefox:** Settings → Home → Homepage and new windows → Custom URLs → paste the URL
+- **Chrome:** Settings → On startup → Open a specific page → paste the URL
 
-## Konfiguration
+### Use it in every new tab (Firefox)
 
-Alles über das Zahnrad-Icon oben rechts. Einstellungen werden im `localStorage` gespeichert und überleben Browser-Neustarts.
+Firefox cannot open a custom URL in new tabs by itself. The add-on
+[**Custom New Tab URL**](https://github.com/TinyBrickBoy/firefox-addon-custom-newtab)
+adds that option. It also keeps the address bar empty, so you can still search
+from it, and puts the cursor into the page.
 
-## Datenquellen
+[![Install](https://img.shields.io/badge/Install-Firefox_Addon-FF7139?style=for-the-badge&logo=firefox)](https://addons.mozilla.org/firefox/addon/custom-new-tab-url/)
 
-- Wetter: [Open-Meteo](https://open-meteo.com)
-- Stadt-Lookup: [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api)
-- PLZ-Lookup: [Zippopotam.us](https://zippopotam.us)
-- Feeds (CORS-Proxy): [corsfix](https://corsfix.com) oder ein eigener Proxy (Einstellungen → Inhalte). `{url}` wird durch die kodierte Feed-URL ersetzt, `{rawurl}` durch die unkodierte; ohne Platzhalter wird die kodierte URL angehängt.
-- Brand-Icons: [Simple Icons](https://simpleicons.org)
-- Schrift: [IBM Plex](https://fonts.google.com/?query=ibm+plex)
+## Configuration
+
+Everything is behind the gear icon in the top right. Settings are stored in `localStorage` and survive browser restarts.
+
+## Data sources
+
+- Weather: [Open-Meteo](https://open-meteo.com)
+- City lookup: [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api)
+- Postal code lookup: [Zippopotam.us](https://zippopotam.us)
+- Feeds (CORS proxy): [corsfix](https://corsfix.com) or your own proxy (Settings → Content). `{url}` is replaced by the encoded feed URL, `{rawurl}` by the unencoded one; without a placeholder the encoded URL is appended.
+- Brand icons: [Simple Icons](https://simpleicons.org)
+- Font: [IBM Plex](https://fonts.google.com/?query=ibm+plex)
